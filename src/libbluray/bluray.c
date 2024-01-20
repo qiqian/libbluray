@@ -1335,6 +1335,7 @@ void bd_unlock_osd_buffer(BLURAY *bd)
     bd_mutex_unlock(&bd->argb_buffer_mutex);
 }
 
+#ifdef JNI
 /*
  * handle graphics updates from BD-J layer
  */
@@ -1413,7 +1414,6 @@ void bd_bdj_osd_cb(BLURAY *bd, const unsigned *img, int w, int h,
 /*
  * BD-J
  */
-
 static int _start_bdj(BLURAY *bd, unsigned title)
 {
     if (bd->bdjava == NULL) {
@@ -1451,6 +1451,7 @@ static void _close_bdj(BLURAY *bd)
         bd->bdjava = NULL;
     }
 }
+#endif
 
 /*
  * open / close
@@ -1582,7 +1583,9 @@ void bd_close(BLURAY *bd)
         return;
     }
 
+#ifdef JNI
     _close_bdj(bd);
+#endif
 
     _close_m2ts(&bd->st0);
     _close_preload(&bd->st_ig);
@@ -3029,6 +3032,7 @@ void bd_select_stream(BLURAY *bd, uint32_t stream_type, uint32_t stream_id, uint
     bd_mutex_unlock(&bd->mutex);
 }
 
+#ifdef JNI
 /*
  * BD-J testing
  */
@@ -3073,6 +3077,7 @@ void bd_stop_bdj(BLURAY *bd)
     _close_bdj(bd);
     bd_mutex_unlock(&bd->mutex);
 }
+#endif
 
 /*
  * Navigation mode interface
@@ -3299,6 +3304,7 @@ static void _queue_initial_psr_events(BLURAY *bd)
     }
 }
 
+#ifdef JNI
 static int _play_bdj(BLURAY *bd, unsigned title)
 {
     int result;
@@ -3314,12 +3320,15 @@ static int _play_bdj(BLURAY *bd, unsigned title)
 
     return result;
 }
+#endif
 
 static int _play_hdmv(BLURAY *bd, unsigned id_ref)
 {
     int result = 1;
 
+#ifdef JNI
     _stop_bdj(bd);
+#endif
 
     bd->title_type = title_hdmv;
 
@@ -3367,7 +3376,11 @@ static int _play_title(BLURAY *bd, unsigned title)
         }
 
         if (bd->disc_info.first_play->bdj) {
+#ifdef JNI
             return _play_bdj(bd, title);
+#else
+            return 0;
+#endif
         } else {
             return _play_hdmv(bd, bd->disc_info.first_play->id_ref);
         }
@@ -3394,7 +3407,11 @@ static int _play_title(BLURAY *bd, unsigned title)
 
         bd_psr_write(bd->regs, PSR_TITLE_NUMBER, title); /* 5.2.3.3 */
         if (bd->disc_info.titles[title]->bdj) {
+#ifdef JNI
             return _play_bdj(bd, title);
+#else
+            return 0;
+#endif
         } else {
             return _play_hdmv(bd, bd->disc_info.titles[title]->id_ref);
         }
