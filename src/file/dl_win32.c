@@ -121,6 +121,7 @@ int dl_dlclose(void *handle)
 // path-separator
 #define PATH_SEPARATOR '\\'
 
+#ifndef _MSC_VER
 const char *dl_get_path(void)
 {
     static char *lib_path    = NULL;
@@ -166,3 +167,4 @@ const char *dl_get_path(void)
 
     return lib_path;
 }
+#endif
